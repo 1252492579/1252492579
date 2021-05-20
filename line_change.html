@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap-5.0.0-beta3-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="icon/iconfont.css">
+    <link rel="stylesheet" href="css/index.css">
+    <script src="javascript/jquery-3.2.1/jquery-3.2.1.min.js"></script>
+    <script src="javascript/jQuery.validate.js_veryhuo.com/jquery.validate.js"></script>
+    <script type="text/javascript" src="javascript/index.js" async></script>
+    <title>初等航变换</title>
+</head>
+
+<body>
+    <div>
+        <textarea name="text" class="form-control" id="text" cols="30" rows="10"></textarea>
+        <button class="btn btn-primary" id="btn1">转换为行阶梯行</button>
+        <button class="btn btn-primary" id="btn2">转换为行阶梯行</button>
+    </div>
+    <div id="answer"></div>
+</body>
+<script>
+    $("#btn1").click(function() {
+        // 接受textarea的数据
+        var data = $("#text").val();
+        // textarea中的数据转到数组arr1
+        var arr1 = data.split('\n');
+        var arr_fin = new Array();
+        // 将取到的数据加工到数组中
+        for (var i = 0; i < arr1.length; i++) {
+            arr_fin[i] = new Array();
+            var arr = arr1[i].split(" ");
+            for (var j = 0; j < arr.length; j++) {
+                arr_fin[i][j] = arr[j] - 0;
+            }
+        }
+        // 如果行列式最后回车到下一行，则将最后的一行删除
+        if (arr_fin[arr_fin.length - 1].length != arr_fin[arr_fin.length - 2].length) {
+            arr_fin.pop();
+        }
+        // 寻找行阶梯矩阵
+
+        find_row_stair(arr_fin);
+        // $("#answer").html(arr_fin);
+        console.log(arr_fin);
+    })
+
+    $("#btn2").click(function() {
+        // 接受textarea的数据
+        var data = $("#text").val();
+        // textarea中的数据转到数组arr1
+        var arr1 = data.split('\n');
+        var arr_fin = new Array();
+        // 将取到的数据加工到数组中
+        for (var i = 0; i < arr1.length; i++) {
+            arr_fin[i] = new Array();
+            var arr = arr1[i].split(" ");
+            for (var j = 0; j < arr.length; j++) {
+                arr_fin[i][j] = arr[j] - 0;
+            }
+        }
+
+        // 如果行列式最后回车到下一行，则将最后的一行删除
+        if (arr_fin[arr_fin.length - 1].length != arr_fin[arr_fin.length - 2].length) {
+            arr_fin.pop();
+        }
+        // 寻找行最简矩阵
+        find_row_simplest(arr_fin);
+
+        // $("#answer").html(arr_fin);
+        console.log(arr_fin);
+    })
+
+    // 找到最小值
+    function find_min(a) {
+        // 将a数组拷贝到b
+        var b = [];
+        for (var i = 0; i < a.length; i++) {
+            b[i] = a[i];
+        }
+        // 绝对值函数
+        for (var i = 0; i < b.length; i++) {
+            if (b[i] < 0) {
+                b[i] *= -1;
+            }
+        }
+
+        var min_num = 99999; //找到非零最小值
+        for (var i = 0; i < b.length; i++) {
+            if (min_num > b[i] && b[i] != 0) {
+                min_num = b[i];
+            }
+        }
+        // if (min_num == 0) {
+        //     return 1;
+        // }
+        return min_num;
+    }
+
+
+
+
+    // 寻找最大公约数函数
+    function max_common_divisor(arr) {
+        // 找到一个数组取绝对值后的最小值，最小值为1
+        var min_num = find_min(arr);
+        var max_yueshu = 1;
+        for (var i = 1; i <= min_num; i++) {
+            var flag = 1; //如果数组中的所有数除以i以后都能除尽，则是约数
+            for (var j = 0; j < arr.length; j++) {
+                if (arr[j] % i == 0) {} else {
+                    flag = 0;
+                }
+            }
+            // flag等于1，代表数组中的所有数都可以除尽i，i就是公约数
+            if (max_yueshu < i && flag == 1) {
+                max_yueshu = i;
+            }
+        }
+        return max_yueshu;
+
+    }
+
+    // 两行相减函数
+    function line_del_line(a, i, j) {
+        var num1 = a[i][i]; //第（i，i)行的数
+        var num2 = a[j][i]; //第(j,i)行的数
+
+        if (num1 != 0 && num2 != 0) {
+            // 第i行乘以第（j,i)的数
+            // 第j行乘以第（i,i)的数
+            for (var col = 0; col < a[i].length; col++) {
+                a[i][col] *= num2; //第i行的所有数都乘以第j行
+                a[j][col] *= num1; //第j行的所有数都乘以第i行
+                a[j][col] -= a[i][col]; //第j行减去第i行
+            }
+            var i_max_common_divisor = max_common_divisor(a[i]); // 找到第i行的最大公约数
+            var j_max_common_divisor = max_common_divisor(a[j]); // 找到第j行的最大公约数
+            // console.log("a[j]:", a[j]);
+            // 循环将第i和j行都除以各自的最大公约数
+            for (var col = 0; col < a[i].length; col++) {
+                a[i][col] /= i_max_common_divisor;
+                a[j][col] /= j_max_common_divisor;
+            }
+        }
+
+    }
+
+    // 循环，将第0行分别于第1-n相消
+    // 1行与2-n相消。。。
+    // 寻找行阶梯矩阵
+    function find_row_stair(arr_fin) {
+        for (var row1 = 0; row1 < arr_fin.length - 1; row1++) {
+            for (row2 = row1 + 1; row2 < arr_fin.length; row2++) {
+                if (row1 != row2) {
+                    line_del_line(arr_fin, row1, row2);
+                }
+            }
+
+        }
+
+        // 如果数组中的数全是负数，则转换过来
+        for (var row = 0; row < arr_fin.length; row++) {
+            trans(arr_fin[row]);
+        }
+    }
+    // 寻找行最简形矩阵
+    function find_row_simplest(arr_fin) {
+        for (var row1 = 0; row1 < arr_fin.length - 1; row1++) {
+            for (row2 = row1 + 1; row2 < arr_fin.length; row2++) {
+                if (row1 != row2) {
+                    line_del_line(arr_fin, row1, row2);
+                }
+            }
+
+        }
+        for (var row1 = arr_fin.length - 1; row1 >= 1; row1--) {
+            for (var row2 = row1 - 1; row2 >= 0; row2--) {
+                if (row1 != row2) {
+                    line_del_line(arr_fin, row1, row2);
+                }
+            }
+        }
+        // 如果数组中的数全是负数，则转换过来
+        for (var row = 0; row < arr_fin.length; row++) {
+            trans(arr_fin[row]);
+        }
+    }
+
+    // 如果一行全是负数，那么全变成正数
+    function trans(a) {
+        var num = -99999;
+        for (var i = 0; i < a.length; ++i) {
+            if (a[i] > num && a[i] != 0) {
+                num = a[i];
+            }
+        }
+        if (num < 0) {
+            for (var i = 0; i < a.length; ++i) {
+                a[i] *= -1;
+            }
+        }
+    }
+</script>
+
+</html>
